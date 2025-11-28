@@ -1,39 +1,60 @@
-// index.js
-// Servidor básico da API do Sistema de Vendas
+// Carrega as variáveis de ambiente do arquivo .env
+require('dotenv').config();
 
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-require("dotenv").config();
+const express = require('express');
+const cors = require('cors');
+const { MongoClient, ServerApiVersion } = require('mongodb');
 
-// Cria a aplicação Express
 const app = express();
 
 // Middlewares básicos
 app.use(cors());
 app.use(express.json());
 
-// URL do MongoDB (Mogno BD)
-// ⚠️ MAIS PRA FRENTE vamos colocar essa string de conexão certinho.
-// Por enquanto, deixe assim:
-const MONGO_URI = process.env.MONGO_URI;
+// Lê a URL do MongoDB do .env
+const uri = process.env.MONGO_URI;
 
-// Conexão com o MongoDB
-mongoose
-  .connect(MONGO_URI)
-  .then(() => {
-    console.log("✅ Conectado ao MongoDB com sucesso");
-  })
-  .catch((err) => {
-    console.error("❌ Erro ao conectar ao MongoDB:", err.message);
-  });
+// Validação simples: se não tiver MONGO_URI, avisa no console
+if (!uri) {
+  console.error('❌ ERRO: MONGO_URI não configurada no arquivo .env');
+}
 
-// Rota simples só para teste
-app.get("/", (req, res) => {
-  res.json({ mensagem: "API do Sistema de Vendas está rodando ✨" });
+// Configuração do cliente MongoDB
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  },
 });
 
-// Porta (para serviços como Render/Railway) ou 3000 localmente
+// Vamos guardar a referência do banco aqui
+let db = null;
+
+// Função para conectar no MongoDB
+async function connectToMongo() {
+  try {
+    await client.connect();
+    // Nome do banco (você pode mudar depois se quiser)
+    db = client.db('sistema_vendas');
+    console.log('✅ Conectado ao MongoDB com sucesso');
+  } catch (error) {
+    console.error('❌ Erro ao conectar no MongoDB:', error.message);
+  }
+}
+
+// Chama a função de conexão
+connectToMongo();
+
+// Rota de teste só para ver se o servidor está de pé
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    mongoConectado: !!db,
+  });
+});
+
+// Porta do servidor (pode vir do .env ou usar 3000 como padrão)
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
