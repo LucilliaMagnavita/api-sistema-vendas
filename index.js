@@ -16,7 +16,7 @@ app.use(express.json());
 // URL do MongoDB (Mogno BD)
 // ⚠️ MAIS PRA FRENTE vamos colocar essa string de conexão certinho.
 // Por enquanto, deixe assim:
-const MONGO_URI = process.env.MONGO_URI || "SUA_STRING_DO_MOGNO_AQUI";
+const MONGO_URI = process.env.MONGO_URI;
 
 // Conexão com o MongoDB
 mongoose
