@@ -1,7 +1,7 @@
 {
   "name": "api-sistema-vendas",
   "version": "1.0.0",
-  "description": "API do sistema de vendas integrada ao MongoDB",
+  "description": "API do sistema de vendas integrado ao MongoDB",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
@@ -10,7 +10,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "mongoose": "^8.6.0"
+    "mongoose": "^8.6.0",
     "mongodb": "^6.8.0"
   }
 }
