@@ -1,4 +1,4 @@
-// Carrega as variáveis de ambiente do arquivo .env
+// Carrega variáveis de ambiente
 require('dotenv').config();
 
 const express = require('express');
@@ -7,19 +7,18 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 
 const app = express();
 
-// Middlewares básicos
+// Middlewares
 app.use(cors());
 app.use(express.json());
 
-// Lê a URL do MongoDB do .env
+// Lê string de conexão do Mongo
 const uri = process.env.MONGO_URI;
 
-// Validação simples: se não tiver MONGO_URI, avisa no console
 if (!uri) {
-  console.error('❌ ERRO: MONGO_URI não configurada no arquivo .env');
+  console.error("❌ ERRO: MONGO_URI não encontrada no .env");
 }
 
-// Configuração do cliente MongoDB
+// Configura o cliente MongoDB
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -28,35 +27,30 @@ const client = new MongoClient(uri, {
   },
 });
 
-// Vamos guardar a referência do banco aqui
+// Variável para guardar o db
 let db = null;
 
-// Função para conectar no MongoDB
-async function connectToMongo() {
+// Função para conectar ao MongoDB
+async function conectarAoMongo() {
   try {
     await client.connect();
-    // Nome do banco (você pode mudar depois se quiser)
-    db = client.db('sistema_vendas');
-    console.log('✅ Conectado ao MongoDB com sucesso');
+    db = client.db("sistema_vendas"); // nome do seu banco
+    console.log("✅ Conectado ao MongoDB!");
   } catch (error) {
-    console.error('❌ Erro ao conectar no MongoDB:', error.message);
+    console.error("❌ Erro ao conectar no MongoDB:", error.message);
   }
 }
 
-// Chama a função de conexão
-connectToMongo();
+// Chama a conexão
+conectarAoMongo();
 
-// Rota de teste só para ver se o servidor está de pé
-app.get('/health', (req, res) => {
+// ROTA DE TESTE
+app.get('/api/health', (req, res) => {
   res.json({
-    status: 'ok',
-    mongoConectado: !!db,
+    status: "ok",
+    mongoConectado: db !== null
   });
 });
 
-// Porta do servidor (pode vir do .env ou usar 3000 como padrão)
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando na porta ${PORT}`);
-});
+// Exporta o app — IMPORTANTE PARA A VERCEL
+module.exports = app;
