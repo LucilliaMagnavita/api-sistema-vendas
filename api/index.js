@@ -1,56 +1,56 @@
-// Carrega variáveis de ambiente
-require('dotenv').config();
+const { MongoClient, ServerApiVersion } = require("mongodb");
 
-const express = require('express');
-const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+// Conexão com cache para não reconectar várias vezes
+let cachedClient = null;
+let cachedDb = null;
 
-const app = express();
-
-// Middlewares
-app.use(cors());
-app.use(express.json());
-
-// Lê string de conexão do Mongo
-const uri = process.env.MONGO_URI;
-
-if (!uri) {
-  console.error("❌ ERRO: MONGO_URI não encontrada no .env");
-}
-
-// Configura o cliente MongoDB
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-});
-
-// Variável para guardar o db
-let db = null;
-
-// Função para conectar ao MongoDB
-async function conectarAoMongo() {
-  try {
-    await client.connect();
-    db = client.db("sistema_vendas"); // nome do seu banco
-    console.log("✅ Conectado ao MongoDB!");
-  } catch (error) {
-    console.error("❌ Erro ao conectar no MongoDB:", error.message);
+async function connectToDatabase() {
+  if (cachedClient && cachedDb) {
+    return { client: cachedClient, db: cachedDb };
   }
+
+  const uri = process.env.MONGO_URI;
+
+  if (!uri) {
+    throw new Error("❌ MONGO_URI não configurada na Vercel.");
+  }
+
+  const client = new MongoClient(uri, {
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true,
+    },
+  });
+
+  await client.connect();
+  const db = client.db("sistema_vendas");
+
+  cachedClient = client;
+  cachedDb = db;
+
+  return { client, db };
 }
 
-// Chama a conexão
-conectarAoMongo();
+module.exports = async (req, res) => {
+  try {
+    const { db } = await connectToDatabase();
 
-// ROTA DE TESTE
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: "ok",
-    mongoConectado: db !== null
-  });
-});
+    // ROTA DE TESTE
+    if (req.method === "GET") {
+      return res.status(200).json({
+        status: "ok",
+        mongoConectado: true,
+      });
+    }
 
-// Exporta o app — IMPORTANTE PARA A VERCEL
-module.exports = app;
+    return res.status(405).json({ error: "Método não permitido" });
+
+  } catch (error) {
+    console.error("❌ ERRO NA API:", error);
+    return res.status(500).json({
+      status: "erro",
+      detalhes: error.message,
+    });
+  }
+};
