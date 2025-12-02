@@ -1,0 +1,2208 @@
+<!doctype html>
+<html lang="pt-BR">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Vendas - Porto Seguro</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+    }
+
+    html {
+      height: 100%;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 12px;
+    }
+
+    .header {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .header h1 {
+      color: #667eea;
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+
+    .header p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .sync-status {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      margin-top: 8px;
+      font-weight: 600;
+    }
+
+    .sync-status.synced {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .sync-status.syncing {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .sync-status.error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .nav-tabs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 8px;
+      background: white;
+      padding: 12px;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 16px;
+    }
+
+    .nav-tab {
+      padding: 12px 8px;
+      border: none;
+      background: #f0f0f0;
+      color: #666;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .nav-tab:hover {
+      background: #e0e0e0;
+    }
+
+    .nav-tab.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      margin-bottom: 16px;
+    }
+
+    .card h2 {
+      color: #333;
+      font-size: 18px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      color: #333;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      font-family: inherit;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+
+    .btn-warning {
+      background: #f59e0b;
+      color: white;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #6b7280;
+      color: white;
+    }
+
+    .btn-small {
+      padding: 8px 12px;
+      font-size: 13px;
+      width: auto;
+      margin: 0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 16px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: bold;
+      color: #667eea;
+      margin: 8px 0;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .list-item {
+      background: #f9fafb;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      border-left: 4px solid #667eea;
+    }
+
+    .list-item h3 {
+      color: #333;
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .list-item p {
+      color: #666;
+      font-size: 13px;
+      margin: 4px 0;
+    }
+
+    .list-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+
+    .badge-success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .badge-warning {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .badge-danger {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .badge-info {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .search-bar input,
+    .search-bar select {
+      flex: 1;
+      min-width: 150px;
+      padding: 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #666;
+    }
+
+    .empty-state h3 {
+      color: #333;
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 16px 24px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      display: none;
+      z-index: 1000;
+      min-width: 280px;
+      text-align: center;
+    }
+
+    .toast.show {
+      display: block;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateX(-50%) translateY(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .toast.success {
+      border-left: 4px solid #10b981;
+    }
+
+    .toast.error {
+      border-left: 4px solid #ef4444;
+    }
+
+    .product-selector {
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .product-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background: #f9fafb;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .product-item-info {
+      flex: 1;
+    }
+
+    .product-item-qty {
+      width: 80px;
+      padding: 8px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 16px;
+    }
+
+    .sale-total {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px;
+      border-radius: 8px;
+      text-align: center;
+      margin: 16px 0;
+    }
+
+    .sale-total-value {
+      font-size: 32px;
+      font-weight: bold;
+    }
+
+    .payment-history {
+      background: #f0fdf4;
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 12px;
+      border-left: 4px solid #10b981;
+    }
+
+    .payment-history-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #d1fae5;
+    }
+
+    .payment-history-item:last-child {
+      border-bottom: none;
+    }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    .loading-overlay.show {
+      display: flex;
+    }
+
+    .loading-spinner {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .spinner {
+      border: 4px solid #f0f0f0;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 600px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .nav-tabs {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      
+      .header h1 {
+        font-size: 20px;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div id="loadingOverlay" class="loading-overlay">
+   <div class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Sincronizando com Google Sheets...</p>
+   </div>
+  </div>
+  <div class="container">
+   <header class="header">
+    <h1>🏪 Sistema de Vendas</h1>
+    <p>Porto Seguro - BA</p>
+    <div id="syncStatus" class="sync-status synced">
+     ☁️ Sincronizado com Google Sheets
+    </div>
+   </header>
+   <nav class="nav-tabs"><button class="nav-tab active" onclick="showScreen('dashboard')">📊 Dashboard</button> <button class="nav-tab" onclick="showScreen('produtos')">📦 Produtos</button> <button class="nav-tab" onclick="showScreen('clientes')">👥 Clientes</button> <button class="nav-tab" onclick="showScreen('vendas')">🛒 Vendas</button> <button class="nav-tab" onclick="showScreen('cobrancas')">💰 Cobranças</button> <button class="nav-tab" onclick="showScreen('visitas')">📅 Visitas</button>
+   </nav><!-- Dashboard -->
+   <main id="dashboard" class="screen active">
+    <div class="stats-grid" id="dashboardStats"></div>
+    <div class="card">
+     <h2>📅 Visitas Agendadas Hoje</h2>
+     <div id="visitasHoje"></div>
+    </div>
+    <div class="card">
+     <h2>💰 Maiores Devedores</h2>
+     <div id="maioresDevedores"></div>
+    </div>
+   </main><!-- Produtos -->
+   <main id="produtos" class="screen">
+    <div class="card">
+     <h2 id="productFormTitle">📦 Cadastrar Produto</h2>
+     <form id="productForm">
+      <div class="form-group"><label for="prodNome">Nome do Produto *</label> <input type="text" id="prodNome" required>
+      </div>
+      <div class="form-group"><label for="prodDesc">Descrição</label> <textarea id="prodDesc"></textarea>
+      </div>
+      <div class="card" style="background:#f0f9ff; border:2px solid #3b82f6; margin-bottom:16px; padding:16px;">
+       <h3 style="color:#1e40af; font-size:16px; margin-bottom:12px;">🧮 Calculadora de Preço de Venda</h3>
+       <div class="form-row">
+        <div class="form-group" style="margin-bottom:0;"><label for="precoCompra">Preço de Compra (R$)</label> <input type="number" id="precoCompra" step="0.01" min="0" placeholder="0,00" oninput="calcularPrecoVenda()">
+        </div>
+        <div class="form-group" style="margin-bottom:0;"><label for="margemLucro">Margem de Lucro (%)</label> <input type="number" id="margemLucro" step="0.1" min="0" placeholder="0" oninput="calcularPrecoVenda()">
+        </div>
+       </div>
+       <div id="resultadoCalculo" style="display:none; background:white; padding:12px; border-radius:6px; margin-top:12px; text-align:center;">
+        <p style="margin:0; color:#059669; font-size:14px; font-weight:600;">💰 Preço de Venda Sugerido:</p>
+        <p style="margin:4px 0 0 0; color:#059669; font-size:24px; font-weight:bold;" id="precoVendaSugerido">R$ 0,00</p><button type="button" class="btn btn-success" onclick="usarPrecoSugerido()" style="margin-top:8px; padding:8px 16px; font-size:14px;">✓ Usar este preço</button>
+       </div>
+      </div>
+      <div class="form-row">
+       <div class="form-group"><label for="prodPreco">Preço de Venda (R$) *</label> <input type="number" id="prodPreco" step="0.01" min="0" required>
+       </div>
+       <div class="form-group"><label for="prodUnidade">Unidade *</label> <select id="prodUnidade" required onchange="toggleFatorConversao()"> <option value="un">Unidade</option> <option value="kg">Kg</option> <option value="g">Gramas</option> <option value="l">Litro</option> <option value="ml">Mililitro</option> <option value="cx">Caixa</option> <option value="pct">Pacote</option> <option value="fardo">Fardo</option> <option value="dz">Dúzia</option> </select>
+       </div>
+      </div>
+      <div id="fatorConversaoGroup" style="display:none; background:#fef3c7; border:2px solid #f59e0b; padding:16px; border-radius:8px; margin-bottom:16px;">
+       <div class="form-group" style="margin-bottom:0;"><label for="fatorConversao">🔢 Fator de Conversão (quantas unidades contém?)</label> <input type="number" id="fatorConversao" step="1" min="1" placeholder="Ex: 12 para caixa com 12 unidades" oninput="calcularPrecoVenda()"> <small style="color:#92400e; font-size:12px; display:block; margin-top:4px;"> ℹ️ Exemplo: Se compra 1 caixa com 12 unidades, digite 12 </small>
+       </div>
+      </div>
+      <div class="form-group"><label for="prodSituacao">Situação *</label> <select id="prodSituacao" required> <option value="ativo">Ativo</option> <option value="inativo">Inativo</option> </select>
+      </div><button type="submit" class="btn btn-primary" id="prodSubmitBtn">✅ Cadastrar Produto</button> <button type="button" class="btn btn-secondary" id="prodCancelBtn" style="display:none;" onclick="cancelEditProduct()">❌ Cancelar</button>
+     </form>
+    </div>
+    <div class="card">
+     <h2>📦 Lista de Produtos</h2>
+     <div class="search-bar"><input type="text" id="searchProduct" placeholder="🔍 Buscar produto..." oninput="renderProducts()">
+     </div><button class="btn btn-primary" onclick="gerarPDFProdutos()" style="margin-bottom:16px;">📄 Gerar Relatório PDF</button>
+     <div id="productList"></div>
+    </div>
+   </main><!-- Clientes -->
+   <main id="clientes" class="screen">
+    <div class="card">
+     <h2 id="clientFormTitle">👤 Cadastrar Cliente</h2>
+     <form id="clientForm">
+      <div class="form-group"><label for="cliNome">Nome Completo *</label> <input type="text" id="cliNome" required>
+      </div>
+      <div class="form-row">
+       <div class="form-group"><label for="cliCPF">CPF</label> <input type="text" id="cliCPF" maxlength="14" placeholder="000.000.000-00" oninput="formatCPF(this)">
+       </div>
+       <div class="form-group"><label for="cliTelefone">Telefone *</label> <input type="tel" id="cliTelefone" required placeholder="(73) 00000-0000">
+       </div>
+      </div>
+      <div class="form-group"><label for="cliLogradouro">Logradouro (Rua/Avenida) *</label> <input type="text" id="cliLogradouro" required>
+      </div>
+      <div class="form-row">
+       <div class="form-group"><label for="cliNumero">Número *</label> <input type="text" id="cliNumero" required>
+       </div>
+       <div class="form-group"><label for="cliComplemento">Complemento</label> <input type="text" id="cliComplemento">
+       </div>
+      </div>
+      <div class="form-group"><label for="cliBairro">Bairro/Distrito *</label> <select id="cliBairro" required> <option value="">Selecione...</option> <optgroup label="🏛️ Distritos"> <option value="Porto Seguro (sede)">Porto Seguro (sede)</option> <option value="Arraial d'Ajuda">Arraial d'Ajuda</option> <option value="Caraíva">Caraíva</option> <option value="Trancoso">Trancoso</option> <option value="Vale Verde">Vale Verde</option> </optgroup> <optgroup label="🏘️ Bairros"> <option value="Centro">Centro</option> <option value="Campinho">Campinho</option> <option value="Riacho Doce">Riacho Doce</option> <option value="Pacatá">Pacatá</option> <option value="Pequi">Pequi</option> <option value="Areião (centro)">Areião (centro)</option> <option value="Manoel Carneiro">Manoel Carneiro</option> <option value="Monte das Oliveiras">Monte das Oliveiras</option> <option value="Village">Village</option> <option value="Baixo Mundaí">Baixo Mundaí</option> <option value="Alto Mundaí">Alto Mundaí</option> <option value="Taperapuã">Taperapuã</option> <option value="Paraíso dos Pataxós">Paraíso dos Pataxós</option> <option value="Tabapiri">Tabapiri</option> <option value="Outeiro da Glória">Outeiro da Glória</option> <option value="Outeiro de São Francisco">Outeiro de São Francisco</option> <option value="Vera Cruz">Vera Cruz</option> <option value="Pindorama">Pindorama</option> <option value="Agrovila">Agrovila</option> <option value="Frei Calixto - Baianão">Frei Calixto - Baianão</option> <option value="Nilo Fraga">Nilo Fraga</option> <option value="Areial (Baianão)">Areial (Baianão)</option> <option value="Casa Nova">Casa Nova</option> <option value="Mercado do Povo">Mercado do Povo</option> <option value="Gravatá">Gravatá</option> <option value="Olhos d'Água">Olhos d'Água</option> <option value="Praça do Coelho">Praça do Coelho</option> <option value="Mirante Caravelas">Mirante Caravelas</option> <option value="José Fontana I e II">José Fontana I e II</option> <option value="Cambolo">Cambolo</option> <option value="Cambolinho">Cambolinho</option> <option value="Sapoti">Sapoti</option> <option value="Miraporto">Miraporto</option> <option value="Parque Ecológico João Carlos I, II e III">Parque Ecológico João Carlos I, II e III</option> <option value="Paraguai">Paraguai</option> <option value="Vila Valdete">Vila Valdete</option> <option value="Vila Jardim (Ubaldinão)">Vila Jardim (Ubaldinão)</option> <option value="Vila Vitória">Vila Vitória</option> <option value="Vila Parracho">Vila Parracho</option> <option value="Vista Alegre I e II">Vista Alegre I e II</option> <option value="Porto Alegre I e II">Porto Alegre I e II</option> <option value="Quinta do Descobrimento">Quinta do Descobrimento</option> <option value="Ibiruçu de Dentro">Ibiruçu de Dentro</option> </optgroup> </select>
+      </div><button type="submit" class="btn btn-primary" id="cliSubmitBtn">✅ Cadastrar Cliente</button> <button type="button" class="btn btn-secondary" id="cliCancelBtn" style="display:none;" onclick="cancelEditClient()">❌ Cancelar</button>
+     </form>
+    </div>
+    <div class="card">
+     <h2>👥 Lista de Clientes</h2>
+     <div class="search-bar"><input type="text" id="searchClient" placeholder="🔍 Buscar por nome ou CPF..." oninput="renderClients()"> <select id="filterBairro" onchange="renderClients()"> <option value="">Todos os Bairros</option> </select>
+     </div><button class="btn btn-primary" onclick="gerarPDFClientes()" style="margin-bottom:16px;">📄 Gerar Relatório PDF</button>
+     <div id="clientList"></div>
+    </div>
+   </main><!-- Vendas -->
+   <main id="vendas" class="screen">
+    <div class="card">
+     <h2>🛒 Registrar Nova Venda</h2>
+     <form id="saleForm">
+      <div class="form-group"><label for="saleCliente">Selecionar Cliente *</label> <select id="saleCliente" required onchange="updateClienteInfo()"> <option value="">Escolha um cliente...</option> </select>
+      </div>
+      <div id="clienteInfoDisplay" style="display:none; background:#f0fdf4; padding:12px; border-radius:8px; margin-bottom:16px;">
+       <p style="margin:4px 0; color:#065f46; font-size:13px;"><strong>📍 Bairro:</strong> <span id="displayBairro"></span></p>
+       <p style="margin:4px 0; color:#065f46; font-size:13px;"><strong>📞 Telefone:</strong> <span id="displayTelefone"></span></p>
+      </div>
+      <div class="form-group"><label>Produtos *</label>
+       <div class="product-selector" id="productSelector">
+        <p style="color:#666; font-size:13px;">Selecione os produtos e quantidades</p>
+       </div>
+      </div>
+      <div class="sale-total">
+       <div style="font-size:14px; margin-bottom:4px;">
+        Valor Total
+       </div>
+       <div class="sale-total-value" id="saleTotal">
+        R$ 0,00
+       </div>
+      </div>
+      <div class="form-group"><label for="saleFormaPagamento">Forma de Pagamento *</label> <select id="saleFormaPagamento" required> <option value="a_vista">À Vista</option> <option value="a_prazo">A Prazo</option> </select>
+      </div>
+      <div class="form-group"><label for="saleObs">Observações</label> <textarea id="saleObs" placeholder="Anotações sobre a venda..."></textarea>
+      </div><button type="submit" class="btn btn-primary">✅ Registrar Venda</button>
+     </form>
+    </div>
+    <div class="card">
+     <h2>📋 Vendas Recentes</h2>
+     <div class="search-bar"><select id="filterVendaStatus" onchange="renderSales()"> <option value="">Todos os Status</option> <option value="em_aberto">Em Aberto</option> <option value="parcialmente_paga">Parcialmente Paga</option> <option value="quitada">Quitada</option> </select> <select id="filterVendaBairro" onchange="renderSales()"> <option value="">Todos os Bairros</option> </select>
+     </div><button class="btn btn-primary" onclick="gerarPDFVendas()" style="margin-bottom:16px;">📄 Gerar Relatório PDF</button>
+     <div id="salesList"></div>
+    </div>
+   </main><!-- Cobranças -->
+   <main id="cobrancas" class="screen">
+    <div class="card">
+     <h2>💰 Gestão de Cobranças</h2>
+     <div class="search-bar"><select id="filterCobrancaBairro" onchange="renderCobrancas()"> <option value="">Todos os Bairros</option> </select> <select id="filterCobrancaStatus" onchange="renderCobrancas()"> <option value="">Todos os Status</option> <option value="em_aberto">Em Aberto</option> <option value="parcialmente_paga">Parcialmente Paga</option> </select>
+     </div><button class="btn btn-primary" onclick="gerarPDFCobrancas()" style="margin-bottom:16px;">📄 Gerar Relatório PDF</button>
+     <div id="cobrancasList"></div>
+    </div>
+   </main><!-- Visitas -->
+   <main id="visitas" class="screen">
+    <div class="card">
+     <h2>📅 Agendar Visita</h2>
+     <form id="visitaForm">
+      <div class="form-group"><label for="visitaCliente">Cliente *</label> <select id="visitaCliente" required onchange="updateVisitaClienteInfo()"> <option value="">Escolha um cliente...</option> </select>
+      </div>
+      <div id="visitaClienteInfo" style="display:none; background:#eff6ff; padding:12px; border-radius:8px; margin-bottom:16px;">
+       <p style="margin:4px 0; color:#1e40af; font-size:13px;"><strong>📍 Bairro:</strong> <span id="visitaBairroDisplay"></span></p>
+       <p style="margin:4px 0; color:#1e40af; font-size:13px;"><strong>💰 Débito:</strong> <span id="visitaDebitoDisplay"></span></p>
+      </div>
+      <div class="form-row">
+       <div class="form-group"><label for="visitaData">Data *</label> <input type="date" id="visitaData" required>
+       </div>
+       <div class="form-group"><label for="visitaHora">Horário</label> <input type="time" id="visitaHora">
+       </div>
+      </div>
+      <div class="form-group"><label for="visitaObs">Observações</label> <textarea id="visitaObs" placeholder="Ex: Cobrar pela manhã, levar máquina de cartão..."></textarea>
+      </div><button type="submit" class="btn btn-primary">✅ Agendar Visita</button>
+     </form>
+    </div>
+    <div class="card">
+     <h2>📋 Visitas Agendadas</h2>
+     <div class="search-bar"><input type="date" id="filterVisitaData" onchange="renderVisitas()"> <select id="filterVisitaBairro" onchange="renderVisitas()"> <option value="">Todos os Bairros</option> </select>
+     </div><button class="btn btn-primary" onclick="gerarPDFVisitas()" style="margin-bottom:16px;">📄 Gerar Relatório PDF</button>
+     <div id="visitasList"></div>
+    </div>
+   </main>
+  </div>
+  <div id="toast" class="toast"><span id="toastMessage"></span>
+  </div>
+  <script>
+    // ⚠️ COLE SUA URL DO GOOGLE APPS SCRIPT AQUI ⚠️
+    const GOOGLE_SCRIPT_URL = 'COLE_SUA_URL_AQUI';
+    
+    // Estrutura de dados
+    let produtos = [];
+    let clientes = [];
+    let vendas = [];
+    let pagamentos = [];
+    let visitas = [];
+    let editingProductId = null;
+    let editingClientId = null;
+    let isSyncing = false;
+
+    // Funções de sincronização
+    async function syncToGoogleSheets() {
+      if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === 'COLE_SUA_URL_AQUI') {
+        console.warn('URL do Google Script não configurada');
+        return;
+      }
+
+      try {
+        showLoading(true);
+        updateSyncStatus('syncing');
+
+        await Promise.all([
+          saveToSheet('produtos', produtos),
+          saveToSheet('clientes', clientes),
+          saveToSheet('vendas', vendas),
+          saveToSheet('pagamentos', pagamentos),
+          saveToSheet('visitas', visitas)
+        ]);
+
+        updateSyncStatus('synced');
+        showLoading(false);
+      } catch (error) {
+        console.error('Erro ao sincronizar:', error);
+        updateSyncStatus('error');
+        showLoading(false);
+        showToast('Erro ao sincronizar com Google Sheets', 'error');
+      }
+    }
+
+    async function loadFromGoogleSheets() {
+      if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === 'COLE_SUA_URL_AQUI') {
+        loadLocalData();
+        return;
+      }
+
+      try {
+        showLoading(true);
+        updateSyncStatus('syncing');
+
+        const [produtosData, clientesData, vendasData, pagamentosData, visitasData] = await Promise.all([
+          loadFromSheet('produtos'),
+          loadFromSheet('clientes'),
+          loadFromSheet('vendas'),
+          loadFromSheet('pagamentos'),
+          loadFromSheet('visitas')
+        ]);
+
+        produtos = produtosData;
+        clientes = clientesData;
+        vendas = vendasData;
+        pagamentos = pagamentosData;
+        visitas = visitasData;
+
+        saveLocalData();
+        updateSyncStatus('synced');
+        showLoading(false);
+      } catch (error) {
+        console.error('Erro ao carregar do Google Sheets:', error);
+        updateSyncStatus('error');
+        showLoading(false);
+        loadLocalData();
+      }
+    }
+
+    async function saveToSheet(type, records) {
+      const response = await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'write',
+          type: type,
+          records: records
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro ao salvar ${type}`);
+      }
+
+      return await response.json();
+    }
+
+    async function loadFromSheet(type) {
+      const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=read&type=${type}`);
+      
+      if (!response.ok) {
+        throw new Error(`Erro ao carregar ${type}`);
+      }
+
+      const result = await response.json();
+      return result.data || [];
+    }
+
+    function showLoading(show) {
+      const overlay = document.getElementById('loadingOverlay');
+      if (show) {
+        overlay.classList.add('show');
+      } else {
+        overlay.classList.remove('show');
+      }
+    }
+
+    function updateSyncStatus(status) {
+      const statusEl = document.getElementById('syncStatus');
+      statusEl.className = `sync-status ${status}`;
+      
+      if (status === 'synced') {
+        statusEl.textContent = '☁️ Sincronizado com Google Sheets';
+      } else if (status === 'syncing') {
+        statusEl.textContent = '🔄 Sincronizando...';
+      } else if (status === 'error') {
+        statusEl.textContent = '⚠️ Erro na sincronização';
+      }
+    }
+
+    function saveLocalData() {
+      localStorage.setItem('produtos', JSON.stringify(produtos));
+      localStorage.setItem('clientes', JSON.stringify(clientes));
+      localStorage.setItem('vendas', JSON.stringify(vendas));
+      localStorage.setItem('pagamentos', JSON.stringify(pagamentos));
+      localStorage.setItem('visitas', JSON.stringify(visitas));
+    }
+
+    function loadLocalData() {
+      produtos = JSON.parse(localStorage.getItem('produtos') || '[]');
+      clientes = JSON.parse(localStorage.getItem('clientes') || '[]');
+      vendas = JSON.parse(localStorage.getItem('vendas') || '[]');
+      pagamentos = JSON.parse(localStorage.getItem('pagamentos') || '[]');
+      visitas = JSON.parse(localStorage.getItem('visitas') || '[]');
+    }
+
+    async function saveData() {
+      saveLocalData();
+      await syncToGoogleSheets();
+    }
+
+    // Inicialização
+    async function init() {
+      await loadFromGoogleSheets();
+      setupEventListeners();
+      populateBairroFilters();
+      renderDashboard();
+      renderProducts();
+      renderClients();
+      renderSales();
+      renderCobrancas();
+      renderVisitas();
+      
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('visitaData').value = today;
+      document.getElementById('filterVisitaData').value = today;
+    }
+
+    function setupEventListeners() {
+      document.getElementById('productForm').addEventListener('submit', handleProductSubmit);
+      document.getElementById('clientForm').addEventListener('submit', handleClientSubmit);
+      document.getElementById('saleForm').addEventListener('submit', handleSaleSubmit);
+      document.getElementById('visitaForm').addEventListener('submit', handleVisitaSubmit);
+    }
+
+    // Navegação
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      
+      document.getElementById(screenId).classList.add('active');
+      event.target.classList.add('active');
+
+      if (screenId === 'dashboard') renderDashboard();
+      else if (screenId === 'vendas') updateProductSelector();
+      
+      updateClienteSelects();
+    }
+
+    // Toast
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toastMessage');
+      
+      toast.className = `toast ${type} show`;
+      toastMessage.textContent = message;
+      
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // Formatação
+    function formatCPF(input) {
+      let value = input.value.replace(/\D/g, '');
+      if (value.length > 11) value = value.slice(0, 11);
+      
+      if (value.length > 9) {
+        value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+      } else if (value.length > 6) {
+        value = value.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+      } else if (value.length > 3) {
+        value = value.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+      }
+      
+      input.value = value;
+    }
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      }).format(value);
+    }
+
+    function formatDate(dateString) {
+      return new Date(dateString).toLocaleDateString('pt-BR');
+    }
+
+    // Calculadora de Preço
+    function calcularPrecoVenda() {
+      const precoCompra = parseFloat(document.getElementById('precoCompra').value) || 0;
+      const margemLucro = parseFloat(document.getElementById('margemLucro').value) || 0;
+      const fatorConversao = parseFloat(document.getElementById('fatorConversao').value) || 1;
+      
+      if (precoCompra > 0 && margemLucro > 0) {
+        const precoVenda = (precoCompra / fatorConversao) * (1 + margemLucro / 100);
+        document.getElementById('precoVendaSugerido').textContent = formatCurrency(precoVenda);
+        
+        let infoExtra = '';
+        if (fatorConversao > 1) {
+          infoExtra = `<p style="margin:8px 0 0 0; color:#059669; font-size:12px;">
+            📦 Preço por unidade: ${formatCurrency(precoCompra / fatorConversao)} + ${margemLucro}% lucro = ${formatCurrency(precoVenda)}
+          </p>`;
+        }
+        
+        document.getElementById('resultadoCalculo').innerHTML = `
+          <p style="margin:0; color:#059669; font-size:14px; font-weight:600;">💰 Preço de Venda Sugerido:</p>
+          <p style="margin:4px 0 0 0; color:#059669; font-size:24px; font-weight:bold;">${formatCurrency(precoVenda)}</p>
+          ${infoExtra}
+          <button type="button" class="btn btn-success" onclick="usarPrecoSugerido()" style="margin-top:8px; padding:8px 16px; font-size:14px;">✓ Usar este preço</button>
+        `;
+        document.getElementById('resultadoCalculo').style.display = 'block';
+      } else {
+        document.getElementById('resultadoCalculo').style.display = 'none';
+      }
+    }
+    
+    function toggleFatorConversao() {
+      const unidade = document.getElementById('prodUnidade').value;
+      const fatorGroup = document.getElementById('fatorConversaoGroup');
+      
+      if (['cx', 'pct', 'fardo', 'dz'].includes(unidade)) {
+        fatorGroup.style.display = 'block';
+      } else {
+        fatorGroup.style.display = 'none';
+        document.getElementById('fatorConversao').value = '';
+      }
+      
+      calcularPrecoVenda();
+    }
+
+    function usarPrecoSugerido() {
+      const precoCompra = parseFloat(document.getElementById('precoCompra').value) || 0;
+      const margemLucro = parseFloat(document.getElementById('margemLucro').value) || 0;
+      const fatorConversao = parseFloat(document.getElementById('fatorConversao').value) || 1;
+      
+      if (precoCompra > 0 && margemLucro > 0) {
+        const precoVenda = (precoCompra / fatorConversao) * (1 + margemLucro / 100);
+        document.getElementById('prodPreco').value = precoVenda.toFixed(2);
+        showToast('Preço de venda aplicado!');
+      }
+    }
+
+    // Produtos
+    async function handleProductSubmit(e) {
+      e.preventDefault();
+      
+      const precoInput = document.getElementById('prodPreco').value;
+      const preco = parseFloat(precoInput);
+      
+      if (isNaN(preco) || preco <= 0) {
+        showToast('Por favor, informe um preço válido', 'error');
+        return;
+      }
+      
+      const produto = {
+        id: editingProductId || 'prod_' + Date.now(),
+        nome: document.getElementById('prodNome').value.trim(),
+        descricao: document.getElementById('prodDesc').value.trim(),
+        preco: preco,
+        unidade: document.getElementById('prodUnidade').value,
+        situacao: document.getElementById('prodSituacao').value
+      };
+
+      if (editingProductId) {
+        const index = produtos.findIndex(p => p.id === editingProductId);
+        produtos[index] = produto;
+        showToast('Produto atualizado e sincronizado!');
+        cancelEditProduct();
+      } else {
+        produtos.push(produto);
+        showToast('Produto cadastrado e sincronizado! 🎉');
+        document.getElementById('productForm').reset();
+        document.getElementById('precoCompra').value = '';
+        document.getElementById('margemLucro').value = '';
+        document.getElementById('fatorConversao').value = '';
+        document.getElementById('resultadoCalculo').style.display = 'none';
+        document.getElementById('fatorConversaoGroup').style.display = 'none';
+      }
+
+      await saveData();
+      renderProducts();
+      updateProductSelector();
+    }
+
+    function renderProducts() {
+      const search = document.getElementById('searchProduct').value.toLowerCase();
+      const filtered = produtos.filter(p => 
+        p.nome.toLowerCase().includes(search) ||
+        p.descricao.toLowerCase().includes(search)
+      );
+
+      const container = document.getElementById('productList');
+      
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="empty-state"><h3>Nenhum produto cadastrado</h3></div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(p => `
+        <div class="list-item">
+          <h3>${p.nome}</h3>
+          <p><strong>Preço:</strong> ${formatCurrency(p.preco)}/${p.unidade}</p>
+          ${p.descricao ? `<p>${p.descricao}</p>` : ''}
+          <span class="badge ${p.situacao === 'ativo' ? 'badge-success' : 'badge-danger'}">
+            ${p.situacao === 'ativo' ? '✓ Ativo' : '✗ Inativo'}
+          </span>
+          <div class="list-actions">
+            <button class="btn btn-warning btn-small" onclick="editProduct('${p.id}')">✏️ Editar</button>
+            <button class="btn btn-danger btn-small" onclick="deleteProduct('${p.id}')">🗑️ Excluir</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function editProduct(id) {
+      const produto = produtos.find(p => p.id === id);
+      if (!produto) return;
+
+      editingProductId = id;
+      document.getElementById('prodNome').value = produto.nome;
+      document.getElementById('prodDesc').value = produto.descricao;
+      document.getElementById('prodPreco').value = produto.preco;
+      document.getElementById('prodUnidade').value = produto.unidade;
+      document.getElementById('prodSituacao').value = produto.situacao;
+      
+      document.getElementById('productFormTitle').textContent = '✏️ Editar Produto';
+      document.getElementById('prodSubmitBtn').textContent = '✅ Atualizar Produto';
+      document.getElementById('prodCancelBtn').style.display = 'block';
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelEditProduct() {
+      editingProductId = null;
+      document.getElementById('productForm').reset();
+      document.getElementById('precoCompra').value = '';
+      document.getElementById('margemLucro').value = '';
+      document.getElementById('fatorConversao').value = '';
+      document.getElementById('resultadoCalculo').style.display = 'none';
+      document.getElementById('fatorConversaoGroup').style.display = 'none';
+      document.getElementById('productFormTitle').textContent = '📦 Cadastrar Produto';
+      document.getElementById('prodSubmitBtn').textContent = '✅ Cadastrar Produto';
+      document.getElementById('prodCancelBtn').style.display = 'none';
+    }
+
+    async function deleteProduct(id) {
+      const hasVendas = vendas.some(v => v.produtos.some(p => p.id === id));
+      
+      if (hasVendas) {
+        showToast('Não é possível excluir produto com vendas registradas', 'error');
+        return;
+      }
+
+      produtos = produtos.filter(p => p.id !== id);
+      await saveData();
+      renderProducts();
+      showToast('Produto excluído e sincronizado!');
+    }
+
+    // Clientes
+    async function handleClientSubmit(e) {
+      e.preventDefault();
+      
+      const cliente = {
+        id: editingClientId || 'cli_' + Date.now(),
+        nome: document.getElementById('cliNome').value,
+        cpf: document.getElementById('cliCPF').value,
+        telefone: document.getElementById('cliTelefone').value,
+        logradouro: document.getElementById('cliLogradouro').value,
+        numero: document.getElementById('cliNumero').value,
+        complemento: document.getElementById('cliComplemento').value,
+        bairro: document.getElementById('cliBairro').value,
+        cidade: 'Porto Seguro',
+        uf: 'BA'
+      };
+
+      if (editingClientId) {
+        const index = clientes.findIndex(c => c.id === editingClientId);
+        clientes[index] = cliente;
+        showToast('Cliente atualizado e sincronizado!');
+        cancelEditClient();
+      } else {
+        clientes.push(cliente);
+        showToast('Cliente cadastrado e sincronizado!');
+        document.getElementById('clientForm').reset();
+      }
+
+      await saveData();
+      renderClients();
+      updateClienteSelects();
+    }
+
+    function renderClients() {
+      const search = document.getElementById('searchClient').value.toLowerCase();
+      const bairroFilter = document.getElementById('filterBairro').value;
+      
+      const filtered = clientes.filter(c => {
+        const matchSearch = c.nome.toLowerCase().includes(search) || 
+                           (c.cpf && c.cpf.includes(search));
+        const matchBairro = !bairroFilter || c.bairro === bairroFilter;
+        return matchSearch && matchBairro;
+      });
+
+      const container = document.getElementById('clientList');
+      
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="empty-state"><h3>Nenhum cliente encontrado</h3></div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(c => {
+        const debito = calcularDebitoCliente(c.id);
+        return `
+          <div class="list-item">
+            <h3>${c.nome}</h3>
+            ${c.cpf ? `<p><strong>CPF:</strong> ${c.cpf}</p>` : ''}
+            <p><strong>📞</strong> ${c.telefone}</p>
+            <p><strong>📍</strong> ${c.logradouro}, ${c.numero}${c.complemento ? ' - ' + c.complemento : ''}</p>
+            <p><strong>🏘️</strong> ${c.bairro}, ${c.cidade} - ${c.uf}</p>
+            ${debito > 0 ? `
+              <p style="color:#ef4444; font-weight:bold; margin-top:8px;">
+                💰 Débito: ${formatCurrency(debito)}
+              </p>
+            ` : ''}
+            <div class="list-actions">
+              <button class="btn btn-warning btn-small" onclick="editClient('${c.id}')">✏️ Editar</button>
+              <button class="btn btn-danger btn-small" onclick="deleteClient('${c.id}')">🗑️ Excluir</button>
+              <button class="btn btn-primary btn-small" onclick="verDetalhesCliente('${c.id}')">👁️ Detalhes</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function editClient(id) {
+      const cliente = clientes.find(c => c.id === id);
+      if (!cliente) return;
+
+      editingClientId = id;
+      document.getElementById('cliNome').value = cliente.nome;
+      document.getElementById('cliCPF').value = cliente.cpf;
+      document.getElementById('cliTelefone').value = cliente.telefone;
+      document.getElementById('cliLogradouro').value = cliente.logradouro;
+      document.getElementById('cliNumero').value = cliente.numero;
+      document.getElementById('cliComplemento').value = cliente.complemento;
+      document.getElementById('cliBairro').value = cliente.bairro;
+      
+      document.getElementById('clientFormTitle').textContent = '✏️ Editar Cliente';
+      document.getElementById('cliSubmitBtn').textContent = '✅ Atualizar Cliente';
+      document.getElementById('cliCancelBtn').style.display = 'block';
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelEditClient() {
+      editingClientId = null;
+      document.getElementById('clientForm').reset();
+      document.getElementById('clientFormTitle').textContent = '👤 Cadastrar Cliente';
+      document.getElementById('cliSubmitBtn').textContent = '✅ Cadastrar Cliente';
+      document.getElementById('cliCancelBtn').style.display = 'none';
+    }
+
+    async function deleteClient(id) {
+      const hasVendas = vendas.some(v => v.clienteId === id);
+      
+      if (hasVendas) {
+        showToast('Não é possível excluir cliente com vendas registradas', 'error');
+        return;
+      }
+
+      clientes = clientes.filter(c => c.id !== id);
+      visitas = visitas.filter(v => v.clienteId !== id);
+      await saveData();
+      renderClients();
+      showToast('Cliente excluído e sincronizado!');
+    }
+
+    function verDetalhesCliente(id) {
+      const cliente = clientes.find(c => c.id === id);
+      const vendasCliente = vendas.filter(v => v.clienteId === id);
+      const debito = calcularDebitoCliente(id);
+      
+      let html = `
+        <div class="list-item" style="background:white; border:none;">
+          <h3>${cliente.nome}</h3>
+          ${cliente.cpf ? `<p><strong>CPF:</strong> ${cliente.cpf}</p>` : ''}
+          <p><strong>Telefone:</strong> ${cliente.telefone}</p>
+          <p><strong>Endereço:</strong> ${cliente.logradouro}, ${cliente.numero}</p>
+          <p><strong>Bairro:</strong> ${cliente.bairro}</p>
+          <p style="margin-top:12px;"><strong>Total de Vendas:</strong> ${vendasCliente.length}</p>
+          <p><strong>Débito Total:</strong> <span style="color:${debito > 0 ? '#ef4444' : '#10b981'}; font-weight:bold;">${formatCurrency(debito)}</span></p>
+        </div>
+      `;
+
+      if (vendasCliente.length > 0) {
+        html += '<h3 style="margin:16px 0 8px 0; color:#333;">Histórico de Vendas</h3>';
+        vendasCliente.sort((a, b) => new Date(b.data) - new Date(a.data)).forEach(v => {
+          const pagos = pagamentos.filter(p => p.vendaId === v.id).reduce((sum, p) => sum + p.valor, 0);
+          const restante = v.valorTotal - pagos;
+          
+          html += `
+            <div class="list-item" style="margin-bottom:8px;">
+              <p><strong>Data:</strong> ${formatDate(v.data)}</p>
+              <p><strong>Total:</strong> ${formatCurrency(v.valorTotal)}</p>
+              <p><strong>Pago:</strong> ${formatCurrency(pagos)}</p>
+              <p><strong>Restante:</strong> <span style="color:${restante > 0 ? '#ef4444' : '#10b981'};">${formatCurrency(restante)}</span></p>
+              <span class="badge ${v.status === 'quitada' ? 'badge-success' : v.status === 'parcialmente_paga' ? 'badge-warning' : 'badge-danger'}">
+                ${v.status === 'quitada' ? '✓ Quitada' : v.status === 'parcialmente_paga' ? '⚠️ Parcial' : '⏳ Em Aberto'}
+              </span>
+            </div>
+          `;
+        });
+      }
+
+      const modal = document.createElement('div');
+      modal.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1000; display:flex; align-items:center; justify-content:center; padding:20px;';
+      modal.innerHTML = `
+        <div style="background:white; border-radius:12px; max-width:600px; width:100%; max-height:90%; overflow-y:auto; padding:24px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; padding-bottom:12px; border-bottom:2px solid #f0f0f0;">
+            <h2 style="margin:0; color:#333;">Detalhes do Cliente</h2>
+            <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background:none; border:none; font-size:28px; cursor:pointer; color:#666; padding:0; width:32px; height:32px;">×</button>
+          </div>
+          ${html}
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    function calcularDebitoCliente(clienteId) {
+      const vendasCliente = vendas.filter(v => v.clienteId === clienteId);
+      let totalDebito = 0;
+      
+      vendasCliente.forEach(v => {
+        const pagos = pagamentos.filter(p => p.vendaId === v.id).reduce((sum, p) => sum + p.valor, 0);
+        totalDebito += (v.valorTotal - pagos);
+      });
+      
+      return totalDebito;
+    }
+
+    // Vendas
+    function updateProductSelector() {
+      const container = document.getElementById('productSelector');
+      const ativos = produtos.filter(p => p.situacao === 'ativo');
+      
+      if (ativos.length === 0) {
+        container.innerHTML = '<p style="color:#ef4444;">Nenhum produto ativo cadastrado</p>';
+        return;
+      }
+
+      container.innerHTML = ativos.map(p => `
+        <div class="product-item">
+          <div class="product-item-info">
+            <strong>${p.nome}</strong><br>
+            <small>${formatCurrency(p.preco)}/${p.unidade}</small>
+          </div>
+          <input type="number" 
+                 class="product-item-qty" 
+                 id="qty_${p.id}" 
+                 min="0" 
+                 value="0" 
+                 placeholder="Qtd"
+                 oninput="calcularTotalVenda()">
+        </div>
+      `).join('');
+    }
+
+    function calcularTotalVenda() {
+      let total = 0;
+      produtos.forEach(p => {
+        const qtyInput = document.getElementById(`qty_${p.id}`);
+        if (qtyInput) {
+          const qty = parseInt(qtyInput.value) || 0;
+          total += qty * p.preco;
+        }
+      });
+      document.getElementById('saleTotal').textContent = formatCurrency(total);
+    }
+
+    function updateClienteInfo() {
+      const clienteId = document.getElementById('saleCliente').value;
+      const display = document.getElementById('clienteInfoDisplay');
+      
+      if (!clienteId) {
+        display.style.display = 'none';
+        return;
+      }
+      
+      const cliente = clientes.find(c => c.id === clienteId);
+      if (!cliente) return;
+      
+      document.getElementById('displayBairro').textContent = cliente.bairro;
+      document.getElementById('displayTelefone').textContent = cliente.telefone;
+      display.style.display = 'block';
+    }
+
+    async function handleSaleSubmit(e) {
+      e.preventDefault();
+      
+      const clienteId = document.getElementById('saleCliente').value;
+      const produtosSelecionados = [];
+      let valorTotal = 0;
+      
+      produtos.forEach(p => {
+        const qtyInput = document.getElementById(`qty_${p.id}`);
+        if (qtyInput) {
+          const qty = parseInt(qtyInput.value) || 0;
+          if (qty > 0) {
+            produtosSelecionados.push({
+              id: p.id,
+              nome: p.nome,
+              quantidade: qty,
+              valorUnitario: p.preco,
+              unidade: p.unidade
+            });
+            valorTotal += qty * p.preco;
+          }
+        }
+      });
+
+      if (produtosSelecionados.length === 0) {
+        showToast('Selecione ao menos um produto com quantidade maior que zero', 'error');
+        return;
+      }
+
+      const venda = {
+        id: 'venda_' + Date.now(),
+        clienteId: clienteId,
+        produtos: produtosSelecionados,
+        valorTotal: valorTotal,
+        formaPagamento: document.getElementById('saleFormaPagamento').value,
+        status: 'em_aberto',
+        observacoes: document.getElementById('saleObs').value,
+        data: new Date().toISOString()
+      };
+
+      vendas.push(venda);
+      await saveData();
+      
+      showToast('Venda registrada e sincronizada com sucesso!');
+      document.getElementById('saleForm').reset();
+      document.getElementById('clienteInfoDisplay').style.display = 'none';
+      updateProductSelector();
+      renderSales();
+      renderDashboard();
+    }
+
+    function renderSales() {
+      const statusFilter = document.getElementById('filterVendaStatus').value;
+      const bairroFilter = document.getElementById('filterVendaBairro').value;
+      
+      let filtered = vendas;
+      
+      if (statusFilter) {
+        filtered = filtered.filter(v => v.status === statusFilter);
+      }
+      
+      if (bairroFilter) {
+        filtered = filtered.filter(v => {
+          const cliente = clientes.find(c => c.id === v.clienteId);
+          return cliente && cliente.bairro === bairroFilter;
+        });
+      }
+
+      const container = document.getElementById('salesList');
+      
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="empty-state"><h3>Nenhuma venda encontrada</h3></div>';
+        return;
+      }
+
+      filtered.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+      container.innerHTML = filtered.map(v => {
+        const cliente = clientes.find(c => c.id === v.clienteId);
+        const pagos = pagamentos.filter(p => p.vendaId === v.id).reduce((sum, p) => sum + p.valor, 0);
+        const restante = v.valorTotal - pagos;
+        
+        return `
+          <div class="list-item">
+            <h3>${cliente ? cliente.nome : 'Cliente não encontrado'}</h3>
+            <p><strong>Data:</strong> ${formatDate(v.data)}</p>
+            <p><strong>Bairro:</strong> ${cliente ? cliente.bairro : '-'}</p>
+            <p><strong>Produtos:</strong> ${v.produtos.map(p => `${p.nome} (${p.quantidade}${p.unidade})`).join(', ')}</p>
+            <p><strong>Valor Total:</strong> ${formatCurrency(v.valorTotal)}</p>
+            <p><strong>Forma:</strong> ${v.formaPagamento === 'a_vista' ? 'À Vista' : 'A Prazo'}</p>
+            <p><strong>Pago:</strong> ${formatCurrency(pagos)} | <strong>Restante:</strong> <span style="color:${restante > 0 ? '#ef4444' : '#10b981'};">${formatCurrency(restante)}</span></p>
+            ${v.observacoes ? `<p style="font-size:12px; color:#666;"><em>${v.observacoes}</em></p>` : ''}
+            <span class="badge ${v.status === 'quitada' ? 'badge-success' : v.status === 'parcialmente_paga' ? 'badge-warning' : 'badge-danger'}">
+              ${v.status === 'quitada' ? '✓ Quitada' : v.status === 'parcialmente_paga' ? '⚠️ Parcial' : '⏳ Em Aberto'}
+            </span>
+            ${restante > 0 ? `
+              <div class="list-actions">
+                <button class="btn btn-success btn-small" onclick="registrarPagamento('${v.id}', ${restante})">💰 Receber</button>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function registrarPagamento(vendaId, valorRestante) {
+      const venda = vendas.find(v => v.id === vendaId);
+      const cliente = clientes.find(c => c.id === venda.clienteId);
+      const pagamentosVenda = pagamentos.filter(p => p.vendaId === vendaId);
+      
+      const modal = document.createElement('div');
+      modal.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1000; display:flex; align-items:center; justify-content:center; padding:20px;';
+      modal.innerHTML = `
+        <div style="background:white; border-radius:12px; max-width:500px; width:100%; max-height:90%; overflow-y:auto; padding:24px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; padding-bottom:12px; border-bottom:2px solid #f0f0f0;">
+            <h2 style="margin:0; color:#333;">💰 Registrar Pagamento</h2>
+            <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background:none; border:none; font-size:28px; cursor:pointer; color:#666; padding:0; width:32px; height:32px;">×</button>
+          </div>
+          
+          <div style="background:#f0fdf4; padding:16px; border-radius:8px; margin-bottom:16px;">
+            <p style="margin:4px 0; color:#065f46;"><strong>Cliente:</strong> ${cliente.nome}</p>
+            <p style="margin:4px 0; color:#065f46;"><strong>Valor Total:</strong> ${formatCurrency(venda.valorTotal)}</p>
+            <p style="margin:4px 0; color:#065f46;"><strong>Já Pago:</strong> ${formatCurrency(venda.valorTotal - valorRestante)}</p>
+            <p style="margin:8px 0 4px 0; font-size:18px; font-weight:bold; color:#ef4444;"><strong>Valor Restante:</strong> ${formatCurrency(valorRestante)}</p>
+          </div>
+
+          ${pagamentosVenda.length > 0 ? `
+            <div style="background:#eff6ff; padding:12px; border-radius:8px; margin-bottom:16px;">
+              <h3 style="margin:0 0 8px 0; font-size:14px; color:#1e40af;">📋 Histórico de Pagamentos</h3>
+              ${pagamentosVenda.map(p => `
+                <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #dbeafe; font-size:13px;">
+                  <span>${formatDate(p.data)}</span>
+                  <span style="font-weight:bold; color:#10b981;">${formatCurrency(p.valor)}</span>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+
+          <form id="pagamentoForm" style="margin-top:16px;">
+            <div style="margin-bottom:16px;">
+              <label style="display:block; margin-bottom:6px; color:#333; font-weight:600; font-size:14px;">Tipo de Pagamento *</label>
+              <select id="tipoPagamento" required style="width:100%; padding:12px; border:2px solid #e0e0e0; border-radius:8px; font-size:16px;" onchange="handleTipoPagamento(${valorRestante})">
+                <option value="">Selecione...</option>
+                <option value="total">💵 Pagamento Total (${formatCurrency(valorRestante)})</option>
+                <option value="parcial">💳 Pagamento Parcial</option>
+              </select>
+            </div>
+
+            <div id="valorParcialGroup" style="display:none; margin-bottom:16px;">
+              <label style="display:block; margin-bottom:6px; color:#333; font-weight:600; font-size:14px;">Valor do Pagamento *</label>
+              <input type="number" id="valorPagamento" step="0.01" min="0.01" max="${valorRestante}" placeholder="0,00" style="width:100%; padding:12px; border:2px solid #e0e0e0; border-radius:8px; font-size:16px;">
+              <small style="color:#666; font-size:12px;">Máximo: ${formatCurrency(valorRestante)}</small>
+            </div>
+
+            <div style="margin-bottom:16px;">
+              <label style="display:block; margin-bottom:6px; color:#333; font-weight:600; font-size:14px;">Forma de Recebimento</label>
+              <select id="formaPagamento" style="width:100%; padding:12px; border:2px solid #e0e0e0; border-radius:8px; font-size:16px;">
+                <option value="dinheiro">💵 Dinheiro</option>
+                <option value="pix">📱 PIX</option>
+                <option value="cartao_debito">💳 Cartão Débito</option>
+                <option value="cartao_credito">💳 Cartão Crédito</option>
+                <option value="transferencia">🏦 Transferência</option>
+              </select>
+            </div>
+
+            <div style="margin-bottom:16px;">
+              <label style="display:block; margin-bottom:6px; color:#333; font-weight:600; font-size:14px;">Observações</label>
+              <textarea id="obsPagamento" placeholder="Ex: Recebido via PIX, comprovante salvo..." style="width:100%; padding:12px; border:2px solid #e0e0e0; border-radius:8px; font-size:16px; resize:vertical; min-height:60px;"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-success" style="margin-bottom:0;">✅ Confirmar Pagamento</button>
+            <button type="button" class="btn btn-secondary" onclick="this.parentElement.parentElement.parentElement.remove()" style="margin-bottom:0;">❌ Cancelar</button>
+          </form>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      
+      document.getElementById('pagamentoForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const tipo = document.getElementById('tipoPagamento').value;
+        let valor = 0;
+        
+        if (tipo === 'total') {
+          valor = valorRestante;
+        } else if (tipo === 'parcial') {
+          valor = parseFloat(document.getElementById('valorPagamento').value);
+          
+          if (!valor || valor <= 0) {
+            showToast('Valor inválido', 'error');
+            return;
+          }
+          
+          if (valor > valorRestante) {
+            showToast('Valor maior que o restante da venda', 'error');
+            return;
+          }
+        } else {
+          showToast('Selecione o tipo de pagamento', 'error');
+          return;
+        }
+
+        const pagamento = {
+          id: 'pag_' + Date.now(),
+          vendaId: vendaId,
+          valor: valor,
+          data: new Date().toISOString(),
+          tipo: tipo,
+          forma: document.getElementById('formaPagamento').value,
+          observacoes: document.getElementById('obsPagamento').value
+        };
+
+        pagamentos.push(pagamento);
+        
+        const totalPago = pagamentos.filter(p => p.vendaId === vendaId).reduce((sum, p) => sum + p.valor, 0);
+        
+        if (totalPago >= venda.valorTotal) {
+          venda.status = 'quitada';
+        } else if (totalPago > 0) {
+          venda.status = 'parcialmente_paga';
+        }
+
+        await saveData();
+        renderSales();
+        renderCobrancas();
+        renderDashboard();
+        modal.remove();
+        showToast(tipo === 'total' ? 'Pagamento total registrado e sincronizado!' : 'Pagamento parcial registrado e sincronizado!');
+      });
+    }
+
+    function handleTipoPagamento(valorRestante) {
+      const tipo = document.getElementById('tipoPagamento').value;
+      const valorGroup = document.getElementById('valorParcialGroup');
+      const valorInput = document.getElementById('valorPagamento');
+      
+      if (tipo === 'parcial') {
+        valorGroup.style.display = 'block';
+        valorInput.required = true;
+        valorInput.max = valorRestante;
+      } else {
+        valorGroup.style.display = 'none';
+        valorInput.required = false;
+      }
+    }
+
+    // Cobranças
+    function renderCobrancas() {
+      const bairroFilter = document.getElementById('filterCobrancaBairro').value;
+      const statusFilter = document.getElementById('filterCobrancaStatus').value;
+      
+      let vendasAbertas = vendas.filter(v => v.status !== 'quitada');
+      
+      if (statusFilter) {
+        vendasAbertas = vendasAbertas.filter(v => v.status === statusFilter);
+      }
+
+      if (bairroFilter) {
+        vendasAbertas = vendasAbertas.filter(v => {
+          const cliente = clientes.find(c => c.id === v.clienteId);
+          return cliente && cliente.bairro === bairroFilter;
+        });
+      }
+
+      const container = document.getElementById('cobrancasList');
+      
+      if (vendasAbertas.length === 0) {
+        container.innerHTML = '<div class="empty-state"><h3>Nenhuma cobrança pendente</h3><p>Todas as vendas estão quitadas! 🎉</p></div>';
+        return;
+      }
+
+      const porCliente = {};
+      vendasAbertas.forEach(v => {
+        if (!porCliente[v.clienteId]) {
+          porCliente[v.clienteId] = [];
+        }
+        porCliente[v.clienteId].push(v);
+      });
+
+      container.innerHTML = Object.entries(porCliente).map(([clienteId, vendas]) => {
+        const cliente = clientes.find(c => c.id === clienteId);
+        let totalDevedor = 0;
+        
+        vendas.forEach(v => {
+          const pagos = pagamentos.filter(p => p.vendaId === v.id).reduce((sum, p) => sum + p.valor, 0);
+          totalDevedor += (v.valorTotal - pagos);
+        });
+
+        return `
+          <div class="list-item">
+            <h3>${cliente ? cliente.nome : 'Cliente não encontrado'}</h3>
+            <p><strong>📞</strong> ${cliente ? cliente.telefone : '-'}</p>
+            <p><strong>📍</strong> ${cliente ? cliente.bairro : '-'}</p>
+            <p style="font-size:18px; font-weight:bold; color:#ef4444; margin-top:8px;">
+              💰 Total Devedor: ${formatCurrency(totalDevedor)}
+            </p>
+            <p><strong>Vendas em aberto:</strong> ${vendas.length}</p>
+            <div class="list-actions">
+              <button class="btn btn-primary btn-small" onclick="verDetalhesCliente('${clienteId}')">👁️ Ver Detalhes</button>
+              <button class="btn btn-success btn-small" onclick="agendarVisita('${clienteId}')">📅 Agendar Visita</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Visitas
+    function agendarVisita(clienteId) {
+      showScreen('visitas');
+      document.getElementById('visitaCliente').value = clienteId;
+      updateVisitaClienteInfo();
+      document.getElementById('visitaCliente').focus();
+    }
+
+    function updateVisitaClienteInfo() {
+      const clienteId = document.getElementById('visitaCliente').value;
+      const display = document.getElementById('visitaClienteInfo');
+      
+      if (!clienteId) {
+        display.style.display = 'none';
+        return;
+      }
+      
+      const cliente = clientes.find(c => c.id === clienteId);
+      if (!cliente) return;
+      
+      const debito = calcularDebitoCliente(clienteId);
+      
+      document.getElementById('visitaBairroDisplay').textContent = cliente.bairro;
+      document.getElementById('visitaDebitoDisplay').textContent = formatCurrency(debito);
+      display.style.display = 'block';
+    }
+
+    async function handleVisitaSubmit(e) {
+      e.preventDefault();
+      
+      const visita = {
+        id: 'visita_' + Date.now(),
+        clienteId: document.getElementById('visitaCliente').value,
+        data: document.getElementById('visitaData').value,
+        hora: document.getElementById('visitaHora').value,
+        observacoes: document.getElementById('visitaObs').value,
+        status: 'pendente'
+      };
+
+      visitas.push(visita);
+      await saveData();
+      
+      showToast('Visita agendada e sincronizada com sucesso!');
+      document.getElementById('visitaForm').reset();
+      document.getElementById('visitaClienteInfo').style.display = 'none';
+      renderVisitas();
+      renderDashboard();
+    }
+
+    function renderVisitas() {
+      const dataFilter = document.getElementById('filterVisitaData').value;
+      const bairroFilter = document.getElementById('filterVisitaBairro').value;
+      
+      let filtered = [...visitas];
+      
+      if (dataFilter) {
+        filtered = filtered.filter(v => v.data === dataFilter);
+      }
+      
+      if (bairroFilter) {
+        filtered = filtered.filter(v => {
+          const cliente = clientes.find(c => c.id === v.clienteId);
+          return cliente && cliente.bairro === bairroFilter;
+        });
+      }
+
+      const container = document.getElementById('visitasList');
+      
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="empty-state"><h3>Nenhuma visita agendada</h3><p>Use o formulário acima para agendar uma nova visita</p></div>';
+        return;
+      }
+
+      filtered.sort((a, b) => {
+        const dateA = new Date(a.data + 'T' + (a.hora || '00:00'));
+        const dateB = new Date(b.data + 'T' + (b.hora || '00:00'));
+        return dateA - dateB;
+      });
+
+      const porBairro = {};
+      filtered.forEach(v => {
+        const cliente = clientes.find(c => c.id === v.clienteId);
+        const bairro = cliente ? cliente.bairro : 'Sem bairro';
+        if (!porBairro[bairro]) {
+          porBairro[bairro] = [];
+        }
+        porBairro[bairro].push(v);
+      });
+
+      container.innerHTML = Object.entries(porBairro).map(([bairro, visitasBairro]) => {
+        const visitasHtml = visitasBairro.map(v => {
+          const cliente = clientes.find(c => c.id === v.clienteId);
+          const debito = calcularDebitoCliente(v.clienteId);
+          const dataVisita = new Date(v.data + 'T00:00:00');
+          const hoje = new Date();
+          hoje.setHours(0,0,0,0);
+          const isPast = dataVisita < hoje;
+          
+          return `
+            <div class="list-item" style="margin-left:12px; border-left-color:#f59e0b;">
+              <h3>${cliente ? cliente.nome : 'Cliente não encontrado'}</h3>
+              <p><strong>📅 Data:</strong> ${formatDate(v.data + 'T00:00:00')} ${v.hora ? '🕐 ' + v.hora : ''}</p>
+              <p><strong>📞</strong> ${cliente ? cliente.telefone : '-'}</p>
+              <p><strong>📍</strong> ${cliente ? `${cliente.logradouro}, ${cliente.numero}` : '-'}</p>
+              ${debito > 0 ? `<p style="color:#ef4444; font-weight:bold;">💰 Débito: ${formatCurrency(debito)}</p>` : ''}
+              ${v.observacoes ? `<p style="font-size:12px; color:#666;"><em>💬 ${v.observacoes}</em></p>` : ''}
+              <span class="badge ${v.status === 'concluida' ? 'badge-success' : isPast ? 'badge-danger' : 'badge-warning'}">
+                ${v.status === 'concluida' ? '✓ Concluída' : isPast ? '⚠️ Atrasada' : '⏳ Pendente'}
+              </span>
+              <div class="list-actions">
+                ${v.status === 'pendente' ? `
+                  <button class="btn btn-success btn-small" onclick="concluirVisita('${v.id}')">✓ Concluir</button>
+                ` : ''}
+                <button class="btn btn-danger btn-small" onclick="deleteVisita('${v.id}')">🗑️ Excluir</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <div style="margin-bottom:20px;">
+            <h3 style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; padding:12px; border-radius:8px; margin-bottom:8px;">
+              🏘️ ${bairro} (${visitasBairro.length} visita${visitasBairro.length > 1 ? 's' : ''})
+            </h3>
+            ${visitasHtml}
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function concluirVisita(id) {
+      const visita = visitas.find(v => v.id === id);
+      if (visita) {
+        visita.status = 'concluida';
+        await saveData();
+        renderVisitas();
+        showToast('Visita concluída e sincronizada!');
+      }
+    }
+
+    async function deleteVisita(id) {
+      visitas = visitas.filter(v => v.id !== id);
+      await saveData();
+      renderVisitas();
+      renderDashboard();
+      showToast('Visita excluída e sincronizada!');
+    }
+
+    // Dashboard
+    function renderDashboard() {
+      const totalClientes = clientes.length;
+      const totalVendas = vendas.length;
+      
+      let totalEmAberto = 0;
+      let totalRecebido = 0;
+      
+      vendas.forEach(v => {
+        const pagos = pagamentos.filter(p => p.vendaId === v.id).reduce((sum, p) => sum + p.valor, 0);
+        totalRecebido += pagos;
+        totalEmAberto += (v.valorTotal - pagos);
+      });
+
+      const today = new Date().toISOString().split('T')[0];
+      const visitasHoje = visitas.filter(v => v.data === today && v.status === 'pendente');
+
+      document.getElementById('dashboardStats').innerHTML = `
+        <div class="stat-card">
+          <div class="stat-label">Clientes</div>
+          <div class="stat-value">${totalClientes}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Vendas</div>
+          <div class="stat-value">${totalVendas}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Em Aberto</div>
+          <div class="stat-value" style="color:#ef4444;">${formatCurrency(totalEmAberto)}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Recebido</div>
+          <div class="stat-value" style="color:#10b981;">${formatCurrency(totalRecebido)}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Visitas Hoje</div>
+          <div class="stat-value" style="color:#f59e0b;">${visitasHoje.length}</div>
+        </div>
+      `;
+
+      const visitasContainer = document.getElementById('visitasHoje');
+      if (visitasHoje.length === 0) {
+        visitasContainer.innerHTML = '<p style="color:#666; text-align:center;">Nenhuma visita agendada para hoje</p>';
+      } else {
+        visitasContainer.innerHTML = visitasHoje.map(v => {
+          const cliente = clientes.find(c => c.id === v.clienteId);
+          return `
+            <div class="list-item" style="border-left-color:#f59e0b;">
+              <h3>${cliente ? cliente.nome : 'Cliente não encontrado'}</h3>
+              <p><strong>🕐</strong> ${v.hora || 'Sem horário definido'}</p>
+              <p><strong>🏘️</strong> ${cliente ? cliente.bairro : '-'}</p>
+              ${v.observacoes ? `<p style="font-size:12px;"><em>${v.observacoes}</em></p>` : ''}
+            </div>
+          `;
+        }).join('');
+      }
+
+      const clientesComDebito = clientes.map(c => ({
+        ...c,
+        debito: calcularDebitoCliente(c.id)
+      })).filter(c => c.debito > 0).sort((a, b) => b.debito - a.debito).slice(0, 5);
+
+      const devedoresContainer = document.getElementById('maioresDevedores');
+      if (clientesComDebito.length === 0) {
+        devedoresContainer.innerHTML = '<p style="color:#666; text-align:center;">Nenhum cliente com débito! 🎉</p>';
+      } else {
+        devedoresContainer.innerHTML = clientesComDebito.map(c => `
+          <div class="list-item">
+            <h3>${c.nome}</h3>
+            <p><strong>🏘️</strong> ${c.bairro}</p>
+            <p style="font-size:18px; font-weight:bold; color:#ef4444;">💰 ${formatCurrency(c.debito)}</p>
+            <div class="list-actions">
+              <button class="btn btn-primary btn-small" onclick="verDetalhesCliente('${c.id}')">👁️ Ver Detalhes</button>
+              <button class="btn btn-success btn-small" onclick="agendarVisita('${c.id}')">📅 Agendar Visita</button>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    // Filtros
+    function populateBairroFilters() {
+      const bairros = [...new Set(clientes.map(c => c.bairro))].sort();
+      
+      const selects = [
+        'filterBairro',
+        'filterVendaBairro',
+        'filterCobrancaBairro',
+        'filterVisitaBairro'
+      ];
+
+      selects.forEach(selectId => {
+        const select = document.getElementById(selectId);
+        const currentValue = select.value;
+        select.innerHTML = '<option value="">Todos os Bairros</option>' +
+          bairros.map(b => `<option value="${b}">${b}</option>`).join('');
+        select.value = currentValue;
+      });
+    }
+
+    function updateClienteSelects() {
+      const clientesSorted = [...clientes].sort((a, b) => a.nome.localeCompare(b.nome));
+      
+      ['saleCliente', 'visitaCliente'].forEach(selectId => {
+        const select = document.getElementById(selectId);
+        const currentValue = select.value;
+        select.innerHTML = '<option value="">Escolha um cliente...</option>' +
+          clientesSorted.map(c => `<option value="${c.id}">${c.nome} - ${c.bairro}</option>`).join('');
+        select.value = currentValue;
+      });
+
+      populateBairroFilters();
+    }
+
+    // Funções de geração de PDF
+    function gerarPDFProdutos() {
+      const search = document.getElementById('searchProduct').value.toLowerCase();
+      const filtered = produtos.filter(p => 
+        p.nome.toLowerCase().includes(search) ||
+        p.descricao.toLowerCase().includes(search)
+      );
+
+      let conteudo = `
+        RELATÓRIO DE PRODUTOS
+        Sistema de Vendas - Porto Seguro, BA
+        Data: ${new Date().toLocaleDateString('pt-BR')}
+        =====================================
+        
+        Total de Produtos: ${filtered.length}
+        
+      `;
+
+      filtered.forEach((p, index) => {
+        conteudo += `
+${index + 1}. ${p.nome}
+   Preço: ${formatCurrency(p.preco)}/${p.unidade}
+   Situação: ${p.situacao === 'ativo' ? 'ATIVO' : 'INATIVO'}
+   ${p.descricao ? 'Descrição: ' + p.descricao : ''}
+   -------------------------------------
+        `;
+      });
+
+      baixarPDF('relatorio_produtos.txt', conteudo);
+    }
+
+    function gerarPDFClientes() {
+      const search = document.getElementById('searchClient').value.toLowerCase();
+      const bairroFilter = document.getElementById('filterBairro').value;
+      
+      const filtered = clientes.filter(c => {
+        const matchSearch = c.nome.toLowerCase().includes(search) || 
+                           (c.cpf && c.cpf.includes(search));
+        const matchBairro = !bairroFilter || c.bairro === bairroFilter;
+        return matchSearch && matchBairro;
+      });
+
+      let conteudo = `
+        RELATÓRIO DE CLIENTES
+        Sistema de Vendas - Porto Seguro, BA
+        Data: ${new Date().toLocaleDateString('pt-BR')}
+        ${bairroFilter ? 'Bairro: ' + bairroFilter : ''}
+        =====================================
+        
+        Total de Clientes: ${filtered.length}
+        
+      `;
+
+      filtered.forEach((c, index) => {
+        const debito = calcularDebitoCliente(c.id);
+        conteudo += `
+${index + 1}. ${c.nome}
+   ${c.cpf ? 'CPF: ' + c.cpf : ''}
+   Telefone: ${c.telefone}
+   Endereço: ${c.logradouro}, ${c.numero}${c.complemento ? ' - ' + c.complemento : ''}
+   Bairro: ${c.bairro}
+   ${debito > 0 ? 'DÉBITO: ' + formatCurrency(debito) : 'SEM DÉBITOS'}
+   -------------------------------------
+        `;
+      });
+
+      baixarPDF('relatorio_clientes.txt', conteudo);
+    }
+
+    function gerarPDFVendas() {
+      const statusFilter = document.getElementById('filterVendaStatus').value;
+      const bairroFilter = document.getElementById('filterVendaBairro').value;
+      
+      let filtered = vendas;
+      
+      if (statusFilter) {
+        filtered = filtered.filter(v => v.status === statusFilter);
+      }
+      
+      if (bairroFilter) {
+        filtered = filtered.filter(v => {
+          const cliente = clientes.find(c => c.id === v.clienteId);
+          return cliente && cliente.bairro === bairroFilter;
+        });
+      }
+
+      filtered.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+      let totalVendas = 0;
+      let totalPago = 0;
+      let totalAberto = 0;
+
+      let conteudo = `
+        RELATÓRIO DE VENDAS
+        Sistema de Vendas - Porto Seguro, BA
+        Data: ${new Date().toLocaleDateString('pt-BR')}
+        ${statusFilter ? 'Status: ' + statusFilter.replace('_', ' ').toUpperCase() : ''}
+        ${bairroFilter ? 'Bairro: ' + bairroFilter : ''}
+        =====================================
+        
+        Total de Vendas: ${filtered.length}
+        
+      `;
+
+      filtered.forEach((v, index) => {
+        const cliente = clientes.find(c => c.id === v.clienteId);
+        const pagos = pagamentos.filter(p => p.vendaId === v.id).reduce((sum, p) => sum + p.valor, 0);
+        const restante = v.valorTotal - pagos;
+        
+        totalVendas += v.valorTotal;
+        totalPago += pagos;
+        totalAberto += restante;
+
+        conteudo += `
+${index + 1}. VENDA #${v.id.slice(-8).toUpperCase()}
+   Cliente: ${cliente ? cliente.nome : 'Não encontrado'}
+   Bairro: ${cliente ? cliente.bairro : '-'}
+   Data: ${formatDate(v.data)}
+   Produtos: ${v.produtos.map(p => `${p.nome} (${p.quantidade}${p.unidade})`).join(', ')}
+   Valor Total: ${formatCurrency(v.valorTotal)}
+   Pago: ${formatCurrency(pagos)}
+   Restante: ${formatCurrency(restante)}
+   Status: ${v.status === 'quitada' ? 'QUITADA' : v.status === 'parcialmente_paga' ? 'PARCIALMENTE PAGA' : 'EM ABERTO'}
+   Forma: ${v.formaPagamento === 'a_vista' ? 'À Vista' : 'A Prazo'}
+   ${v.observacoes ? 'Obs: ' + v.observacoes : ''}
+   -------------------------------------
+        `;
+      });
+
+      conteudo += `
+        
+RESUMO GERAL:
+Total em Vendas: ${formatCurrency(totalVendas)}
+Total Recebido: ${formatCurrency(totalPago)}
+Total em Aberto: ${formatCurrency(totalAberto)}
+      `;
+
+      baixarPDF('relatorio_vendas.txt', conteudo);
+    }
+
+    function gerarPDFCobrancas() {
+      const bairroFilter = document.getElementById('filterCobrancaBairro').value;
+      const statusFilter = document.getElementById('filterCobrancaStatus').value;
+      
+      let vendasAbertas = vendas.filter(v => v.status !== 'quitada');
+      
+      if (statusFilter) {
+        vendasAbertas = vendasAbertas.filter(v => v.status === statusFilter);
+      }
+
+      if (bairroFilter) {
+        vendasAbertas = vendasAbertas.filter(v => {
+          const cliente = clientes.find(c => c.id === v.clienteId);
+          return cliente && cliente.bairro === bairroFilter;
+        });
+      }
+
+      const porCliente = {};
+      vendasAbertas.forEach(v => {
+        if (!porCliente[v.clienteId]) {
+          porCliente[v.clienteId] = [];
+        }
+        porCliente[v.clienteId].push(v);
+      });
+
+      let totalGeral = 0;
+
+      let conteudo = `
+        RELATÓRIO DE COBRANÇAS
+        Sistema de Vendas - Porto Seguro, BA
+        Data: ${new Date().toLocaleDateString('pt-BR')}
+        ${bairroFilter ? 'Bairro: ' + bairroFilter : ''}
+        ${statusFilter ? 'Status: ' + statusFilter.replace('_', ' ').toUpperCase() : ''}
+        =====================================
+        
+        Total de Clientes com Débito: ${Object.keys(porCliente).length}
+        
+      `;
+
+      Object.entries(porCliente).forEach(([clienteId, vendas], index) => {
+        const cliente = clientes.find(c => c.id === clienteId);
+        let totalDevedor = 0;
+        
+        vendas.forEach(v => {
+          const pagos = pagamentos.filter(p => p.vendaId === v.id).reduce((sum, p) => sum + p.valor, 0);
+          totalDevedor += (v.valorTotal - pagos);
+        });
+
+        totalGeral += totalDevedor;
+
+        conteudo += `
+${index + 1}. ${cliente ? cliente.nome : 'Cliente não encontrado'}
+   Telefone: ${cliente ? cliente.telefone : '-'}
+   Bairro: ${cliente ? cliente.bairro : '-'}
+   Endereço: ${cliente ? cliente.logradouro + ', ' + cliente.numero : '-'}
+   
+   DÉBITO TOTAL: ${formatCurrency(totalDevedor)}
+   Vendas em aberto: ${vendas.length}
+   
+   Detalhes das vendas:
+        `;
+
+        vendas.forEach((v, vIndex) => {
+          const pagos = pagamentos.filter(p => p.vendaId === v.id).reduce((sum, p) => sum + p.valor, 0);
+          const restante = v.valorTotal - pagos;
+          conteudo += `
+   ${vIndex + 1}) ${formatDate(v.data)} - Total: ${formatCurrency(v.valorTotal)} | Pago: ${formatCurrency(pagos)} | Restante: ${formatCurrency(restante)}
+          `;
+        });
+
+        conteudo += `
+   -------------------------------------
+        `;
+      });
+
+      conteudo += `
+        
+TOTAL GERAL EM ABERTO: ${formatCurrency(totalGeral)}
+      `;
+
+      baixarPDF('relatorio_cobrancas.txt', conteudo);
+    }
+
+    function gerarPDFVisitas() {
+      const dataFilter = document.getElementById('filterVisitaData').value;
+      const bairroFilter = document.getElementById('filterVisitaBairro').value;
+      
+      let filtered = [...visitas];
+      
+      if (dataFilter) {
+        filtered = filtered.filter(v => v.data === dataFilter);
+      }
+      
+      if (bairroFilter) {
+        filtered = filtered.filter(v => {
+          const cliente = clientes.find(c => c.id === v.clienteId);
+          return cliente && cliente.bairro === bairroFilter;
+        });
+      }
+
+      filtered.sort((a, b) => {
+        const dateA = new Date(a.data + 'T' + (a.hora || '00:00'));
+        const dateB = new Date(b.data + 'T' + (b.hora || '00:00'));
+        return dateA - dateB;
+      });
+
+      const porBairro = {};
+      filtered.forEach(v => {
+        const cliente = clientes.find(c => c.id === v.clienteId);
+        const bairro = cliente ? cliente.bairro : 'Sem bairro';
+        if (!porBairro[bairro]) {
+          porBairro[bairro] = [];
+        }
+        porBairro[bairro].push(v);
+      });
+
+      let conteudo = `
+        RELATÓRIO DE VISITAS AGENDADAS
+        Sistema de Vendas - Porto Seguro, BA
+        Data do Relatório: ${new Date().toLocaleDateString('pt-BR')}
+        ${dataFilter ? 'Filtro de Data: ' + formatDate(dataFilter + 'T00:00:00') : ''}
+        ${bairroFilter ? 'Bairro: ' + bairroFilter : ''}
+        =====================================
+        
+        Total de Visitas: ${filtered.length}
+        Total de Bairros: ${Object.keys(porBairro).length}
+        
+      `;
+
+      Object.entries(porBairro).forEach(([bairro, visitasBairro]) => {
+        conteudo += `
+        
+═══════════════════════════════════════
+BAIRRO: ${bairro.toUpperCase()}
+Total de Visitas: ${visitasBairro.length}
+═══════════════════════════════════════
+        `;
+
+        visitasBairro.forEach((v, index) => {
+          const cliente = clientes.find(c => c.id === v.clienteId);
+          const debito = calcularDebitoCliente(v.clienteId);
+          const dataVisita = new Date(v.data + 'T00:00:00');
+          const hoje = new Date();
+          hoje.setHours(0,0,0,0);
+          const isPast = dataVisita < hoje;
+
+          conteudo += `
+          
+${index + 1}. ${cliente ? cliente.nome : 'Cliente não encontrado'}
+   Data: ${formatDate(v.data + 'T00:00:00')} ${v.hora ? 'às ' + v.hora : ''}
+   Telefone: ${cliente ? cliente.telefone : '-'}
+   Endereço: ${cliente ? cliente.logradouro + ', ' + cliente.numero : '-'}
+   ${debito > 0 ? 'DÉBITO: ' + formatCurrency(debito) : 'SEM DÉBITOS'}
+   Status: ${v.status === 'concluida' ? 'CONCLUÍDA' : isPast ? 'ATRASADA' : 'PENDENTE'}
+   ${v.observacoes ? 'Observações: ' + v.observacoes : ''}
+   -------------------------------------
+          `;
+        });
+      });
+
+      baixarPDF('relatorio_visitas.txt', conteudo);
+    }
+
+    function baixarPDF(nomeArquivo, conteudo) {
+      const blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nomeArquivo;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      showToast('Relatório baixado com sucesso!');
+    }
+
+    // Inicializar ao carregar
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a7715ee11f78769',t:'MTc2NDYzOTMwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
