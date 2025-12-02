@@ -1,4 +1,5 @@
 // api/produtos.js (Código Final Corrigido)
+//correcao final
 
 // Usamos 'import' em vez de 'require' para módulos ES, preferido pelo Vercel
 import { MongoClient, ServerApiVersion } from "mongodb";
